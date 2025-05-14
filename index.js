@@ -3,8 +3,9 @@ import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import mongoose from 'mongoose';
-import todoRoute from "./routes/todoRoutes.js";
 
+import todoRoute from "./routes/todoRoutes.js";
+import usersRoute from "./routes/usersRoutes.js";
 
 const app = express();
 dotenv.config()
@@ -16,8 +17,8 @@ app.use(cookieParser()); // Enable cookie parsing
 const CONNECTION_URL = process.env.CONNECTION_URL
 const PORT = process.env.PORT
 
-
 app.use("/service/todo", todoRoute)
+app.use("/service/user", usersRoute)
 
 mongoose.set("strictQuery", true)
 
