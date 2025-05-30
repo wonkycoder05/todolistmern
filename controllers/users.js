@@ -2,7 +2,10 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import Users from '../models/users.js';
 
-// check password and confirmPassword
+const { DEFAULT_CLIENT_URL } = process.env
+
+
+/// check password and confirmPassword
 function isMatch(password, confirm_password) {
     if (password === confirm_password) return true
     return false
@@ -18,6 +21,11 @@ function validateEmail(email) {
 function validatePassword(password) {
     const re = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/
     return re.test(password)
+}
+
+// create refresh token
+function createRefreshToken(payload) {
+    return jwt.sign(payload, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '1d' })
 }
 
 // user sign-up
@@ -50,35 +58,62 @@ export const signUp = async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
-        const newUser = new Users({
+        const newUser = {
             personal_id,
             name,
             email,
             password: hashedPassword,
             address,
             phone_number
-        });
+        };
 
-        await newUser.save();
+        // create email notification for user activation
+        const refreshToken = createRefreshToken(newUser)
 
-        res.status(200).json({
-            message: "User registered successfully",
-            user: {
-                id: newUser._id,
-                name: newUser.name,
-                email: newUser.email
-            }
-        })
+        const url = `${DEFAULT_CLIENT_URL}/user/activate/${refreshToken}`;
+
+        userSendMail(email, url, "Verify your email address", "Confirm Email")
+
+        res.json({ message: "Register Success! Please activate your email to start" });
     } catch (error) {
         return res.status(500).json({ message: error.message });
     }
-
-    
 }
 
 // create refresh token
 function createRefreshToken(payload) {
     return jwt.sign(payload, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '1d'} )
+}
+
+// email activation
+export const activateEmail = async (req, res) => {
+    try {
+        const { activation_token } = req.body;
+        const user = jwt.verify(activation_token, process.env.REFRESH_TOKEN_SECRET)
+
+        const { personal_id, name, email, password, address, phone_number } = user
+
+        const existingUser = await Users.findOne({ email });
+
+        if (existingUser) {
+            return res.status(400).json({ message: "This email already exists." });
+        }
+
+        const newUser = new Users({
+            personal_id,
+            name,
+            email,
+            password,
+            address,
+            phone_number
+        })
+
+        await newUser.save()
+
+        res.json({ message: "Account has been activated. Please login now!" });
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
 }
 
 // user sign-in
@@ -131,3 +166,4 @@ export const userInfor = async (req, res) => {
         return res.status(500).json({ message: error.message });
     }
 }
+
