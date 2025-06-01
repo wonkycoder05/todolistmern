@@ -1,6 +1,7 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import Users from '../models/users.js';
+import { userSendMail } from './userSendMail.js';
 
 const { DEFAULT_CLIENT_URL } = process.env
 
@@ -23,10 +24,6 @@ function validatePassword(password) {
     return re.test(password)
 }
 
-// create refresh token
-function createRefreshToken(payload) {
-    return jwt.sign(payload, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '1d' })
-}
 
 // user sign-up
 export const signUp = async (req, res) => {
