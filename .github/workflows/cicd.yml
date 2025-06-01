@@ -19,17 +19,17 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Login to Docker Hub
-        run: docker login -u ${{ magdalenaabinus }} -p ${{ $ummeR160505 }}
+        run: docker login -u  magdalenaabinus  -p duarduar1616
 
       - name: Build and Push Backend Image
         run: |
-          docker build -t ${{ magdalenaabinus }}/todolist-backend:latest ./server
-          docker push ${{ magdalenaabinus }}/todolist-backend:latest
+          docker build -t  magdalenaabinus /todolist-backend:latest ./server
+          docker push  magdalenaabinus /todolist-backend:latest
 
       - name: Build and Push Frontend Image
         run: |
-          docker build -t ${{ magdalenaabinus }}/todolist-frontend:latest ./client
-          docker push ${{ magdalenaabinus }}/todolist-frontend:latest
+          docker build -t  magdalenaabinus /todolist-frontend:latest ./client
+          docker push  magdalenaabinus /todolist-frontend:latest
 
   continuous-deployment:
     needs: continuous-integration
@@ -46,10 +46,10 @@ jobs:
           echo "export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/docker.sock" >> $GITHUB_ENV
 
       - name: Pull Latest Backend Image
-        run: docker pull ${{ magdalenaabinus }}/todolist-backend:latest
+        run: docker pull  magdalenaabinus /todolist-backend:latest
 
       - name: Pull Latest Frontend Image
-        run: docker pull ${{ magdalenaabinus }}/todolist-frontend:latest
+        run: docker pull  magdalenaabinus /todolist-frontend:latest
 
       - name: Stop and Remove Old Containers
         run: |
